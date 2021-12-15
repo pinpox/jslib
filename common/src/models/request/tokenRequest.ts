@@ -14,9 +14,10 @@ export class TokenRequest implements CaptchaProtectedRequest {
     clientId: string;
     clientSecret: string;
     device?: DeviceRequest;
+    orgIdentifier?: string;
 
     constructor(credentials: string[], codes: string[], clientIdClientSecret: string[], public provider: TwoFactorProviderType,
-        public token: string, public remember: boolean, public captchaResponse: string, device?: DeviceRequest) {
+        public token: string, public remember: boolean, public captchaResponse: string, device?: DeviceRequest, orgIdentifier?: string) {
         if (credentials != null && credentials.length > 1) {
             this.email = credentials[0];
             this.masterPasswordHash = credentials[1];
@@ -27,6 +28,9 @@ export class TokenRequest implements CaptchaProtectedRequest {
         } else if (clientIdClientSecret != null && clientIdClientSecret.length > 1) {
             this.clientId = clientIdClientSecret[0];
             this.clientSecret = clientIdClientSecret[1];
+        }
+        if (orgIdentifier && orgIdentifier !== '') {
+            this.orgIdentifier = orgIdentifier;
         }
         this.device = device != null ? device : null;
     }
@@ -50,6 +54,7 @@ export class TokenRequest implements CaptchaProtectedRequest {
             obj.code = this.code;
             obj.code_verifier = this.codeVerifier;
             obj.redirect_uri = this.redirectUri;
+            obj.org_identifier = this.orgIdentifier;
         } else {
             throw new Error('must provide credentials or codes');
         }

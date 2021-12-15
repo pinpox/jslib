@@ -33,6 +33,7 @@ import { OrganizationSsoRequest } from '../models/request/organization/organizat
 import { OrganizationCreateRequest } from '../models/request/organizationCreateRequest';
 import { OrganizationImportRequest } from '../models/request/organizationImportRequest';
 import { OrganizationKeysRequest } from '../models/request/organizationKeysRequest';
+import { OrganizationSsoUpdateRequest } from '../models/request/organizationSsoUpdateRequest';
 import { OrganizationSubscriptionUpdateRequest } from '../models/request/organizationSubscriptionUpdateRequest';
 import { OrganizationTaxInfoUpdateRequest } from '../models/request/organizationTaxInfoUpdateRequest';
 import { OrganizationUpdateRequest } from '../models/request/organizationUpdateRequest';
@@ -142,6 +143,7 @@ import { SendAccessResponse } from '../models/response/sendAccessResponse';
 import { SendFileDownloadDataResponse } from '../models/response/sendFileDownloadDataResponse';
 import { SendFileUploadDataResponse } from '../models/response/sendFileUploadDataResponse';
 import { SendResponse } from '../models/response/sendResponse';
+import { SsoConfigResponse } from '../models/response/ssoConfigResponse';
 import { SubscriptionResponse } from '../models/response/subscriptionResponse';
 import { SyncResponse } from '../models/response/syncResponse';
 import { TaxInfoResponse } from '../models/response/taxInfoResponse';
@@ -376,6 +378,8 @@ export abstract class ApiService {
     getOrganizationSso: (id: string) => Promise<OrganizationSsoResponse>;
     postOrganization: (request: OrganizationCreateRequest) => Promise<OrganizationResponse>;
     putOrganization: (id: string, request: OrganizationUpdateRequest) => Promise<OrganizationResponse>;
+    getSsoConfig: (id: string) => Promise<SsoConfigResponse>;
+    putOrganizationSso: (id: string, request: OrganizationSsoUpdateRequest) => Promise<SsoConfigResponse>;
     putOrganizationTaxInfo: (id: string, request: OrganizationTaxInfoUpdateRequest) => Promise<any>;
     postLeaveOrganization: (id: string) => Promise<any>;
     postOrganizationLicense: (data: FormData) => Promise<OrganizationResponse>;

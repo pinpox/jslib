@@ -37,6 +37,7 @@ import { OrganizationSsoRequest } from '../models/request/organization/organizat
 import { OrganizationCreateRequest } from '../models/request/organizationCreateRequest';
 import { OrganizationImportRequest } from '../models/request/organizationImportRequest';
 import { OrganizationKeysRequest } from '../models/request/organizationKeysRequest';
+import { OrganizationSsoUpdateRequest } from '../models/request/organizationSsoUpdateRequest';
 import { OrganizationSubscriptionUpdateRequest } from '../models/request/organizationSubscriptionUpdateRequest';
 import { OrganizationTaxInfoUpdateRequest } from '../models/request/organizationTaxInfoUpdateRequest';
 import { OrganizationUpdateRequest } from '../models/request/organizationUpdateRequest';
@@ -152,6 +153,7 @@ import { SendAccessResponse } from '../models/response/sendAccessResponse';
 import { SendFileDownloadDataResponse } from '../models/response/sendFileDownloadDataResponse';
 import { SendFileUploadDataResponse } from '../models/response/sendFileUploadDataResponse';
 import { SendResponse } from '../models/response/sendResponse';
+import { SsoConfigResponse } from '../models/response/ssoConfigResponse';
 import { SubscriptionResponse } from '../models/response/subscriptionResponse';
 import { SyncResponse } from '../models/response/syncResponse';
 import { TaxInfoResponse } from '../models/response/taxInfoResponse';
@@ -1126,6 +1128,16 @@ export class ApiService implements ApiServiceAbstraction {
     async getOrganization(id: string): Promise<OrganizationResponse> {
         const r = await this.send('GET', '/organizations/' + id, null, true, true);
         return new OrganizationResponse(r);
+    }
+
+    async getSsoConfig(id: string): Promise<SsoConfigResponse> {
+        const r = await this.send('GET', '/organizations/' + id + '/sso', null, true, true);
+        return new SsoConfigResponse(r);
+    }
+
+    async putOrganizationSso(id: string, request: OrganizationSsoUpdateRequest): Promise<SsoConfigResponse> {
+        const r = await this.send('PUT', '/organizations/' + id + '/sso', request, true, false);
+        return new SsoConfigResponse(r);
     }
 
     async getOrganizationBilling(id: string): Promise<BillingResponse> {

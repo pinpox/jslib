@@ -29,7 +29,7 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     formPromise: Promise<any>;
     masterPasswordScore: number;
     referenceData: ReferenceEventRequest;
-    showTerms = true;
+    showTerms = false;
     acceptPolicies: boolean = false;
 
     protected successRoute = 'login';
@@ -41,7 +41,7 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
         platformUtilsService: PlatformUtilsService,
         protected passwordGenerationService: PasswordGenerationService, environmentService: EnvironmentService) {
         super(environmentService, i18nService, platformUtilsService);
-        this.showTerms = !platformUtilsService.isSelfHost();
+        this.showTerms = false;
     }
 
     async ngOnInit() {
@@ -79,6 +79,12 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     }
 
     async submit() {
+        if (typeof crypto.subtle === 'undefined') {
+            this.platformUtilsService.showToast('error', "This browser requires HTTPS to use the web vault",
+                "Check the Vaultwarden wiki for details on how to enable it");
+            return;
+        }
+
         if (!this.acceptPolicies && this.showTerms) {
             this.platformUtilsService.showToast('error', this.i18nService.t('errorOccurred'),
                 this.i18nService.t('acceptPoliciesError'));

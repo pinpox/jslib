@@ -20,6 +20,8 @@ import { Utils } from 'jslib-common/misc/utils';
 
 import { AuthResult } from 'jslib-common/models/domain/authResult';
 
+import { switchMap } from 'rxjs/operators';
+
 @Directive()
 export class SsoComponent {
     identifier: string;
@@ -51,13 +53,21 @@ export class SsoComponent {
 
     async ngOnInit() {
         const queryParamsSub = this.route.queryParams.subscribe(async qParams => {
-            if (qParams.code != null && qParams.state != null) {
+
+		// I have no idea why the qParams is empty here - I've hacked in an
+		// alternative very messily, but it works.
+            const workingParams = (new URL(window.location.href)).searchParams;
+            const workingSwap = {
+                code: workingParams.get('code'),
+                state: workingParams.get('state'),
+            };
+            if (workingSwap.code != null && workingSwap.state != null) {
                 const codeVerifier = await this.storageService.get<string>(ConstantsService.ssoCodeVerifierKey);
                 const state = await this.storageService.get<string>(ConstantsService.ssoStateKey);
                 await this.storageService.remove(ConstantsService.ssoCodeVerifierKey);
                 await this.storageService.remove(ConstantsService.ssoStateKey);
-                if (qParams.code != null && codeVerifier != null && state != null && this.checkState(state, qParams.state)) {
-                    await this.logIn(qParams.code, codeVerifier, this.getOrgIdentiferFromState(qParams.state));
+                if (workingSwap.code != null && codeVerifier != null && state != null && this.checkState(state, workingSwap.state)) {
+                    await this.logIn(workingSwap.code, codeVerifier, this.getOrgIdentiferFromState(workingSwap.state));
                 }
             } else if (qParams.clientId != null && qParams.redirectUri != null && qParams.state != null &&
                 qParams.codeChallenge != null) {
@@ -125,7 +135,7 @@ export class SsoComponent {
         let authorizeUrl = this.environmentService.getIdentityUrl() + '/connect/authorize?' +
             'client_id=' + this.clientId + '&redirect_uri=' + encodeURIComponent(this.redirectUri) + '&' +
             'response_type=code&scope=api offline_access&' +
-            'state=' + state + '&code_challenge=' + codeChallenge + '&' +
+            'state=' + encodeURIComponent(state) + '&code_challenge=' + codeChallenge + '&' +
             'code_challenge_method=S256&response_mode=query&' +
             'domain_hint=' + encodeURIComponent(this.identifier);
 
@@ -140,7 +150,7 @@ export class SsoComponent {
     private async logIn(code: string, codeVerifier: string, orgIdFromState: string) {
         this.loggingIn = true;
         try {
-            this.formPromise = this.authService.logInSso(code, codeVerifier, this.redirectUri);
+            this.formPromise = this.authService.logInSso(code, codeVerifier, this.redirectUri, orgIdFromState);
             const response = await this.formPromise;
             if (response.twoFactor) {
                 if (this.onSuccessfulLoginTwoFactorNavigate != null) {

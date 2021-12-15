@@ -131,11 +131,12 @@ export class AuthService implements AuthServiceAbstraction {
             key, null, null, null, captchaToken);
     }
 
-    async logInSso(code: string, codeVerifier: string, redirectUrl: string): Promise<AuthResult> {
+    async logInSso(code: string, codeVerifier: string, redirectUrl: string, orgIdentifier: string): Promise<AuthResult> {
         this.selectedTwoFactorProviderType = null;
         return await this.logInHelper(null, null, null, code, codeVerifier, redirectUrl, null, null,
-            null, null, null, null);
+            null, null, null, null, orgIdentifier);
     }
+
 
     async logInApiKey(clientId: string, clientSecret: string): Promise<AuthResult> {
         this.selectedTwoFactorProviderType = null;
@@ -273,7 +274,7 @@ export class AuthService implements AuthServiceAbstraction {
 
     private async logInHelper(email: string, hashedPassword: string, localHashedPassword: string, code: string,
         codeVerifier: string, redirectUrl: string, clientId: string, clientSecret: string, key: SymmetricCryptoKey,
-        twoFactorProvider?: TwoFactorProviderType, twoFactorToken?: string, remember?: boolean, captchaToken?: string): Promise<AuthResult> {
+        twoFactorProvider?: TwoFactorProviderType, twoFactorToken?: string, remember?: boolean, orgIdentifier?: string, captchaToken?: string): Promise<AuthResult> {
         const storedTwoFactorToken = await this.tokenService.getTwoFactorToken(email);
         const appId = await this.appIdService.getAppId();
         const deviceRequest = new DeviceRequest(appId, this.platformUtilsService);
@@ -301,13 +302,13 @@ export class AuthService implements AuthServiceAbstraction {
         let request: TokenRequest;
         if (twoFactorToken != null && twoFactorProvider != null) {
             request = new TokenRequest(emailPassword, codeCodeVerifier, clientIdClientSecret, twoFactorProvider,
-                twoFactorToken, remember, captchaToken, deviceRequest);
+                twoFactorToken, remember, captchaToken, deviceRequest, orgIdentifier);
         } else if (storedTwoFactorToken != null) {
             request = new TokenRequest(emailPassword, codeCodeVerifier, clientIdClientSecret,
-                TwoFactorProviderType.Remember, storedTwoFactorToken, false, captchaToken, deviceRequest);
+                TwoFactorProviderType.Remember, storedTwoFactorToken, false, captchaToken, deviceRequest, orgIdentifier);
         } else {
             request = new TokenRequest(emailPassword, codeCodeVerifier, clientIdClientSecret, null,
-                null, false, captchaToken, deviceRequest);
+                null, false, captchaToken, deviceRequest, orgIdentifier);
         }
 
         const response = await this.apiService.postIdentityToken(request);
