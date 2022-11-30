@@ -202,13 +202,29 @@ export class ApiService implements ApiServiceAbstraction {
             headers.set('User-Agent', this.customUserAgent);
         }
         request.alterIdentityTokenHeaders(headers);
-        const response = await this.fetch(new Request(this.environmentService.getIdentityUrl() + '/connect/token', {
-            body: this.qsStringify(request.toIdentityToken(request.clientId ?? this.platformUtilsService.identityClientId)),
-            credentials: this.getCredentials(),
+
+		console.log("request:")
+		console.log(request);
+		console.log("request end")
+
+		console.log("identity url" + this.environmentService.getIdentityUrl());
+		let mybody = this.qsStringify(request.toIdentityToken(request.clientId ?? this.platformUtilsService.identityClientId));
+		console.log(mybody);
+
+		let mycreds = this.getCredentials();
+		console.log(mycreds);
+
+		let myrec = 	new Request(this.environmentService.getIdentityUrl() + '/connect/token', {
+            body: mybody,
+            credentials: mycreds,
             cache: 'no-store',
             headers: headers,
             method: 'POST',
-        }));
+        });
+
+		console.log(myrec);
+
+        const response = await this.fetch(myrec);
 
         let responseJson: any = null;
         if (this.isJsonResponse(response)) {

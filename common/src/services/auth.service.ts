@@ -132,7 +132,10 @@ export class AuthService implements AuthServiceAbstraction {
     }
 
     async logInSso(code: string, codeVerifier: string, redirectUrl: string, orgIdentifier: string): Promise<AuthResult> {
+
+			console.log("auth.service.ts loginsso1");
         this.selectedTwoFactorProviderType = null;
+			console.log("auth.service.ts loginsso2");
         return await this.logInHelper(null, null, null, code, codeVerifier, redirectUrl, null, null,
             null, null, null, null, orgIdentifier);
     }
@@ -279,6 +282,7 @@ export class AuthService implements AuthServiceAbstraction {
         const appId = await this.appIdService.getAppId();
         const deviceRequest = new DeviceRequest(appId, this.platformUtilsService);
 
+			console.log("auth.service.ts loginhelper");
         let emailPassword: string[] = [];
         let codeCodeVerifier: string[] = [];
         let clientIdClientSecret: [string, string] = [null, null];
@@ -299,6 +303,8 @@ export class AuthService implements AuthServiceAbstraction {
             clientIdClientSecret = null;
         }
 
+			console.log("auth.service.ts loginhelper1");
+
         let request: TokenRequest;
         if (twoFactorToken != null && twoFactorProvider != null) {
             request = new TokenRequest(emailPassword, codeCodeVerifier, clientIdClientSecret, twoFactorProvider,
@@ -311,7 +317,9 @@ export class AuthService implements AuthServiceAbstraction {
                 null, false, captchaToken, deviceRequest, orgIdentifier);
         }
 
+			console.log("auth.service.ts loginhelper2");
         const response = await this.apiService.postIdentityToken(request);
+			console.log("auth.service.ts loginhelper3");
 
         this.clearState();
         const result = new AuthResult();
@@ -346,10 +354,13 @@ export class AuthService implements AuthServiceAbstraction {
             await this.tokenService.setTwoFactorToken(tokenResponse.twoFactorToken, email);
         }
 
+		console.log("loginhelper 1");
+
         await this.tokenService.setTokens(tokenResponse.accessToken, tokenResponse.refreshToken, clientIdClientSecret);
         await this.userService.setInformation(this.tokenService.getUserId(), this.tokenService.getEmail(),
             tokenResponse.kdf, tokenResponse.kdfIterations);
         if (this.setCryptoKeys) {
+		console.log("loginhelper 2");
             if (key != null) {
                 await this.cryptoService.setKey(key);
             }
@@ -357,29 +368,37 @@ export class AuthService implements AuthServiceAbstraction {
                 await this.cryptoService.setKeyHash(localHashedPassword);
             }
 
+		console.log("loginhelper 3");
             // Skip this step during SSO new user flow. No key is returned from server.
             if (code == null || tokenResponse.key != null) {
                 await this.cryptoService.setEncKey(tokenResponse.key);
 
+		console.log("loginhelper 4");
                 // User doesn't have a key pair yet (old account), let's generate one for them
                 if (tokenResponse.privateKey == null) {
                     try {
+		console.log("loginhelper 5");
                         const keyPair = await this.cryptoService.makeKeyPair();
                         await this.apiService.postAccountKeys(new KeysRequest(keyPair[0], keyPair[1].encryptedString));
                         tokenResponse.privateKey = keyPair[1].encryptedString;
                     } catch (e) {
+		console.log("loginhelper 6");
                         // tslint:disable-next-line
                         this.logService.error(e);
                     }
                 }
 
+		console.log("loginhelper 7");
                 await this.cryptoService.setEncPrivateKey(tokenResponse.privateKey);
             }
         }
 
+
+		console.log("loginhelper 8");
         if (this.vaultTimeoutService != null) {
             this.vaultTimeoutService.biometricLocked = false;
         }
+		console.log("loginhelper 9");
         this.messagingService.send('loggedIn');
         return result;
     }

@@ -81,13 +81,17 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
 
     getIdentityUrl() {
         if (this.identityUrl != null) {
+
+			console.log("environment.service.ts if1" + this.identityUrl);
             return this.identityUrl;
         }
 
         if (this.baseUrl) {
+			console.log("environment.service.ts if2");
             return this.baseUrl + '/identity';
         }
 
+			console.log("environment.service.ts if3");
         return 'https://identity.bitwarden.com';
     }
 

@@ -61,22 +61,30 @@ export class SsoComponent {
                 code: workingParams.get('code'),
                 state: workingParams.get('state'),
             };
+
+			console.log("jslib/angular/src/components/sso.component.ts")
+			console.log(workingParams);
+
             if (workingSwap.code != null && workingSwap.state != null) {
+			console.log("if 1");
                 const codeVerifier = await this.storageService.get<string>(ConstantsService.ssoCodeVerifierKey);
                 const state = await this.storageService.get<string>(ConstantsService.ssoStateKey);
                 await this.storageService.remove(ConstantsService.ssoCodeVerifierKey);
                 await this.storageService.remove(ConstantsService.ssoStateKey);
                 if (workingSwap.code != null && codeVerifier != null && state != null && this.checkState(state, workingSwap.state)) {
+					console.log("this.login");
                     await this.logIn(workingSwap.code, codeVerifier, this.getOrgIdentiferFromState(workingSwap.state));
                 }
             } else if (qParams.clientId != null && qParams.redirectUri != null && qParams.state != null &&
                 qParams.codeChallenge != null) {
+				console.log("else 1");
                 this.redirectUri = qParams.redirectUri;
                 this.state = qParams.state;
                 this.codeChallenge = qParams.codeChallenge;
                 this.clientId = qParams.clientId;
             }
             if (queryParamsSub != null) {
+			console.log("if 2");
                 queryParamsSub.unsubscribe();
             }
         });
@@ -148,10 +156,16 @@ export class SsoComponent {
     }
 
     private async logIn(code: string, codeVerifier: string, orgIdFromState: string) {
+
+		console.log("redirect url: " + this.redirectUri);
+
         this.loggingIn = true;
         try {
+		console.log("sso.component.login.try");
             this.formPromise = this.authService.logInSso(code, codeVerifier, this.redirectUri, orgIdFromState);
+		console.log("sso.component.login.try1");
             const response = await this.formPromise;
+		console.log("sso.component.login.try2");
             if (response.twoFactor) {
                 if (this.onSuccessfulLoginTwoFactorNavigate != null) {
                     this.onSuccessfulLoginTwoFactorNavigate();
@@ -180,18 +194,28 @@ export class SsoComponent {
                     this.router.navigate([this.forcePasswordResetRoute]);
                 }
             } else {
+
+		console.log("sso.component.else");
                 const disableFavicon = await this.storageService.get<boolean>(ConstantsService.disableFaviconKey);
                 await this.stateService.save(ConstantsService.disableFaviconKey, !!disableFavicon);
                 if (this.onSuccessfulLogin != null) {
+		console.log("sso.component.else.if1");
                     this.onSuccessfulLogin();
                 }
                 if (this.onSuccessfulLoginNavigate != null) {
+		console.log("sso.component.else.if2");
                     this.onSuccessfulLoginNavigate();
                 } else {
+		console.log("sso.component.else.else");
                     this.router.navigate([this.successRoute]);
                 }
             }
-        } catch { }
+        } catch { 
+
+		console.log("sso.component.login.catch");
+		}
+
+		console.log("sso.componentloggingIN=false");
         this.loggingIn = false;
     }
 
